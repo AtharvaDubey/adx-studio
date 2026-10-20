@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ADx Studio</title>
+<link rel="icon" href="/static/logo_small.png">
+<style>
+:root{--bg:#09090b;--panel:#121215;--panel2:#18181d;--line:#24242b;--text:#efebe3;--dim:#8b8984;--ember:#ff6a1a;--ember2:#ffb27a;--ok:#6fcf97;--err:#ff5c5c;--r:10px}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:13.5px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif}
+button,select,input,textarea{font:inherit;color:var(--text)}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;white-space:nowrap;transition:background .12s,border-color .12s}
+button:hover{border-color:#45454e;background:#202027}button:disabled{opacity:.4;cursor:default}
+button.primary{background:var(--ember);border-color:var(--ember);color:#160a02;font-weight:650}
+button.primary:hover{background:#ff7d36}
+button.ghost{background:transparent;border-color:transparent}button.ghost:hover{background:#1c1c22}
+button.sm{padding:3px 8px;font-size:12px;border-radius:6px}
+button.big{padding:10px 18px;font-size:15px;border-radius:10px}
+input[type=text],input[type=number],select,textarea{background:#0e0e11;border:1px solid var(--line);border-radius:7px;padding:6px 9px}
+textarea{resize:vertical;width:100%;line-height:1.5}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ember)}
+input[type=range]{accent-color:var(--ember);width:100%}
+input[type=color]{width:34px;height:28px;border:1px solid var(--line);border-radius:6px;background:none;padding:2px;cursor:pointer}
+input[type=checkbox],input[type=radio]{accent-color:var(--ember)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:.06em;font-size:14px}
+.brand img{height:30px;filter:drop-shadow(0 0 6px #ff6a1a55)}
+.brand span i{color:var(--ember);font-style:normal}
+.sp{flex:1}.dim{color:var(--dim)}
+.hint{color:var(--dim);font-size:12px;margin:6px 0 0}
+kbd{background:#1f1f26;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:11px;font-family:inherit}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#2a1a0e;border:1px solid var(--ember);padding:10px 16px;border-radius:10px;max-width:640px;display:none;z-index:50;box-shadow:0 10px 30px #0008}
+/* ============ home ============ */
+#home{height:100%;overflow:auto}
+#home header{display:flex;align-items:center;gap:10px;padding:14px 28px;border-bottom:1px solid var(--line)}
+.hero{padding:44px 28px 20px;display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;max-width:1300px;margin:0 auto}
+.hero h1{margin:0;font-size:34px;letter-spacing:-.01em;font-weight:750}
+.hero p{margin:6px 0 0;color:var(--dim);font-size:15px;max-width:560px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding:10px 28px 40px;max-width:1300px;margin:0 auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s;position:relative}
+.card:hover{transform:translateY(-2px);border-color:#3a3a44}
+.card .th{aspect-ratio:16/9;background:#050506 center/cover no-repeat;display:flex;align-items:center;justify-content:center}
+.card .th img{max-height:60%;opacity:.85}
+.card .meta{padding:10px 12px}.card .meta b{display:block;font-size:14px}.card .meta span{color:var(--dim);font-size:12px}
+.card .del{position:absolute;top:8px;right:8px;opacity:0;background:#000a}.card:hover .del{opacity:1}
+.card.new{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;border-style:dashed;color:var(--dim);gap:8px;font-size:14px}
+.card.new .plus{font-size:34px;color:var(--ember)}
+/* ============ modal ============ */
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:30;padding:20px}
+.dlg{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(920px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 30px 80px #000c}
+.dlg header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dlg header h2{margin:0;font-size:17px}
+.dlg .body{padding:18px 20px;overflow:auto}
+.dlg footer{display:flex;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid var(--line)}
+.steps{display:flex;gap:6px;margin-left:auto}.steps span{width:26px;height:4px;border-radius:2px;background:#2a2a32}.steps span.on{background:var(--ember)}
+.field{margin-bottom:14px}.field label{display:block;font-size:12px;color:var(--dim);margin-bottom:5px;font-weight:600;letter-spacing:.02em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.drop{border:1.5px dashed #3a3a44;border-radius:10px;padding:18px;text-align:center;color:var(--dim);cursor:pointer}
+.drop.ok{border-color:var(--ember);color:var(--text)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.tcard{border:1.5px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;background:var(--panel2)}
+.tcard img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.tcard div{padding:8px 10px}.tcard b{font-size:13px}.tcard p{margin:2px 0 0;font-size:11.5px;color:var(--dim);line-height:1.35}
+.tcard.act{border-color:var(--ember);box-shadow:0 0 0 3px #ff6a1a33}
+.aspects{display:flex;gap:8px;flex-wrap:wrap}
+.aspects button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 12px;min-width:96px}
+.aspects button i{display:block;border:2px solid currentColor;border-radius:3px}
+.aspects button.act{border-color:var(--ember);color:var(--ember2)}
+/* ============ editor ============ */
+#editor{height:100%;display:grid;grid-template-rows:52px 1fr}
+#editor>header{display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--panel)}
+#ptitle{font-weight:650;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#stepnav{display:flex;gap:2px;margin:0 auto;background:#0d0d10;border:1px solid var(--line);border-radius:10px;padding:3px}
+#stepnav button{border:0;background:transparent;color:var(--dim);padding:6px 14px;border-radius:7px}
+#stepnav button b{display:inline-block;width:18px;height:18px;line-height:18px;border-radius:50%;background:#24242b;color:var(--dim);font-size:11px;margin-right:6px;text-align:center}
+#stepnav button.act{background:#22222a;color:var(--text)}#stepnav button.act b{background:var(--ember);color:#160a02}
+#status{color:var(--dim);font-size:12px;min-width:120px;text-align:right}
+#status.warn{color:var(--ember2)}#status.err{color:var(--err)}#status.ok{color:var(--ok)}
+#ework{display:grid;grid-template-columns:380px 1fr;grid-template-rows:minmax(0,1fr) 210px;min-height:0}
+#side{grid-row:1;overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
+.sec{padding:14px 16px;border-bottom:1px solid #1c1c22}
+.sec h4{margin:0 0 10px;font-size:11px;letter-spacing:.09em;color:var(--dim);text-transform:uppercase;font-weight:650;display:flex;align-items:center;gap:8px}
+.row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.row+.row{margin-top:7px}
+.row>label.l{width:62px;color:var(--dim);font-size:12px}
+.row input[type=number]{width:84px}.row input[type=text]{flex:1;min-width:0}
+label.chk{display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.sl{display:grid;grid-template-columns:84px 1fr 38px;align-items:center;gap:8px;margin:6px 0}
+.sl span{color:var(--dim);font-size:12px}.sl output{text-align:right;font-variant-numeric:tabular-nums;font-size:12px;color:var(--dim)}
+.chips{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0 0 26px}
+.chip{padding:1px 7px;border-radius:9px;background:#202027;border:1px solid transparent;cursor:pointer;font-size:12px}
+.chip.ed{box-shadow:inset 0 -2px 0 var(--ember)}.chip.cur{background:var(--ember);color:#160a02}.chip.sel{border-color:var(--ember2);background:#3a2616}
+.line{padding:7px 14px;border-bottom:1px solid #1a1a1f}.line.cur{background:#1d1812}.line.selline{background:#1a1a21}
+.lh{display:flex;align-items:center;gap:6px}.ln{width:20px;text-align:right;color:var(--dim);font-size:11px}
+.lt{flex:1;min-width:0;background:transparent!important;border:1px solid transparent!important;padding:3px 5px!important}
+.lt:hover{border-color:var(--line)!important}.lt:focus{border-color:var(--ember)!important}
+.ts{color:var(--dim);font-size:11px;font-variant-numeric:tabular-nums}
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.swatches label{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--dim)}
+.mini{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.mini .tcard div{padding:5px 8px}.mini .tcard b{font-size:12px}
+.preset{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;cursor:pointer;margin-bottom:7px}
+.preset.act{border-color:var(--ember);background:#1f150e}.preset small{color:var(--dim);margin-left:auto}
+.bar{height:6px;background:#1f1f25;border-radius:3px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;width:0;background:var(--ember);transition:width .3s}
+.rlist div{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}.rlist a{color:var(--ember2);text-decoration:none}
+.tap{border:1px solid var(--line);border-radius:12px;padding:14px;background:#0e0e11;text-align:center}
+.tap .now{font-size:17px;font-weight:650;min-height:26px}.tap .next{color:var(--dim);font-size:13px;min-height:20px;margin-top:4px}
+.tap .count{color:var(--dim);font-size:11px;margin-top:8px;letter-spacing:.06em}
+#tapBtn{width:100%;margin-top:12px;padding:16px;font-size:16px}
+#warns div{color:var(--ember2);cursor:pointer;font-size:12px;padding:1px 0}
+#stage{grid-row:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+#preview{flex:1;position:relative;min-height:0;background:#050506}
+#view{position:absolute;inset:0;width:100%;height:100%}
+#vid{position:absolute;inset:0;width:100%;height:100%;background:#000}
+.badge{position:absolute;background:#000c;border-radius:6px;padding:3px 9px;font-size:12px;font-variant-numeric:tabular-nums}
+#pvmsg{left:12px;top:10px;color:var(--ember2)}#pvinfo{right:12px;top:10px;color:var(--dim)}#ba{left:12px;bottom:12px;color:var(--ember2)}
+#closevid{position:absolute;right:12px;bottom:56px;z-index:2}
+#transport{display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+#clock{font-variant-numeric:tabular-nums;min-width:140px}
+.grp{display:flex;align-items:center;gap:4px;padding-right:9px;border-right:1px solid var(--line)}.grp:last-child{border-right:0}
+#btnPlay{width:44px;height:32px;border-radius:50%;padding:0;font-size:13px;background:var(--ember);border-color:var(--ember);color:#160a02}
+#tl{grid-column:1/3;grid-row:2;border-top:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+#tlbar{display:flex;align-items:center;gap:8px;padding:4px 12px;background:var(--panel);border-bottom:1px solid var(--line);font-size:12px;color:var(--dim)}
+#cvwrap{flex:1;min-height:0;position:relative}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.empty{padding:16px;color:var(--dim)}
+</style>
+</head>
+<body>
+
+<!-- ======================= HOME ======================= -->
+<div id="home">
+  <header><div class="brand"><img src="/static/logo_small.png" alt=""><span>ADx <i>STUDIO</i></span></div><span class="sp"></span>
+    <button class="ghost" id="hImport">Import project zip…</button><input type="file" id="fileZip" accept=".zip" hidden>
+    <button class="ghost" id="hQuit" title="Stop ADx Studio">Quit</button></header>
+  <div class="hero"><div><h1>Make a lyric video</h1><p>Pick a song, paste the lyrics, choose a style. Sync the words, adjust the look and export a finished music video.</p></div>
+    <span class="sp"></span><button class="primary big" id="hNew">+ New video</button></div>
+  <div class="grid" id="pgrid"></div>
+</div>
+
+<!-- ======================= NEW VIDEO WIZARD ======================= -->
+<div class="modal" id="wiz" hidden><div class="dlg">
+  <header><h2 id="wTitle">New video</h2><div class="steps"><span class="on"></span><span></span></div><button class="ghost sm" id="wClose">✕</button></header>
+  <div class="body">
+    <div id="w1">
+      <div class="two"><div class="field"><label>SONG TITLE</label><input type="text" id="wName" placeholder="Karam" style="width:100%"></div>
+        <div class="field"><label>ARTIST</label><input type="text" id="wArtist" placeholder="ADx" style="width:100%"></div></div>
+      <div class="field"><label>SONG FILE</label><div class="drop" id="wDrop">Drop an MP3/WAV here or click to choose</div><input type="file" id="wAudio" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac" hidden></div>
+      <div class="field"><label>LYRICS · one line per lyric line</label><textarea id="wLyrics" rows="11" placeholder="Paste your lyrics here…"></textarea></div>
+      <label class="chk"><input type="checkbox" id="wAuto" checked>Auto sync the lyrics to the vocal after creating (recommended)</label>
+    </div>
+    <div id="w2" hidden>
+      <div class="field"><label>FORMAT</label><div class="aspects" id="wAspects"></div></div>
+      <div class="field"><label>STYLE TEMPLATE</label><div class="tgrid" id="wTemplates"></div></div>
+    </div>
+  </div>
+  <footer><span class="dim" id="wMsg"></span><span class="sp"></span><button id="wBack" hidden>Back</button><button class="primary" id="wNext">Next: choose a style</button></footer>
+</div></div>
+
+<!-- ======================= EDITOR ======================= -->
+<div id="editor" hidden>
+  <header>
+    <button class="ghost" id="eHome" title="All projects">← Projects</button>
+    <span id="ptitle"></span>
+    <nav id="stepnav">
+      <button data-step="lyrics" class="act"><b>1</b>Lyrics</button><button data-step="sync"><b>2</b>Sync</button>
+      <button data-step="style"><b>3</b>Style</button><button data-step="look"><b>4</b>Colour</button><button data-step="export"><b>5</b>Export</button>
+    </nav>
+    <button class="ghost sm" id="btnUndo" disabled title="⌘Z">↶</button><button class="ghost sm" id="btnRedo" disabled title="⇧⌘Z">↷</button>
+    <span id="status"></span>
+  </header>
+  <div id="ework">
+    <aside id="side">
+      <!-- LYRICS -->
+      <div class="pane" id="p-lyrics">
+        <div class="sec" id="lyrEditBox"><h4>All lyrics</h4>
+          <textarea id="lyrText" rows="8"></textarea>
+          <div class="row"><button class="sm primary" id="lyrApply">Apply lyrics</button><span class="hint" style="margin:0">Lines you don't change keep their timing.</span></div></div>
+        <div class="sec" style="padding-bottom:4px"><h4>Lines <span class="dim" style="text-transform:none;letter-spacing:0;font-weight:400">· click a word to jump to it, edit a line to fix a typo</span></h4></div>
+        <div id="lines"></div>
+      </div>
+      <!-- SYNC -->
+      <div class="pane" id="p-sync" hidden>
+        <div class="sec"><h4>Auto sync</h4>
+          <p class="hint" style="margin:0 0 10px">Listens to the song and times every lyric word to the vocal, on this Mac. The first run downloads the speech models (about 330 MB).</p>
+          <div class="row"><button class="primary" id="asBtn">✦ Auto sync lyrics</button><span class="hint" id="asEta" style="margin:0"></span></div>
+          <div id="asProg" hidden><div class="bar"><i id="asBar"></i></div><p class="hint" id="asText"></p></div>
+          <p class="hint">Works best when the lyrics match what is sung. Check the result, then fix any word by dragging it or with tap sync below.</p></div>
+        <div class="sec"><h4>Tap to sync</h4>
+          <div class="tap"><div class="now" id="tapNow">Press Start, then tap as each line begins</div><div class="next" id="tapNext"></div><div class="count" id="tapCount"></div>
+            <button class="primary" id="tapBtn">Start tap sync</button></div>
+          <div class="row" style="margin-top:10px"><label class="chk"><input type="radio" name="tapmode" value="line" checked>tap each line</label><label class="chk"><input type="radio" name="tapmode" value="word">tap each word</label></div>
+          <p class="hint">While the song plays, press <kbd>T</kbd> (or the big button) right when the next line starts. <kbd>Esc</kbd> stops. Start from the selected line by clicking it first.</p>
+        </div>
+        <div class="sec"><h4>Fine-tune selected word</h4>
+          <div id="iwLabel" class="hint" style="margin:0 0 8px">Click a word on the timeline below.</div>
+          <div class="row"><label class="l">start</label><input type="number" id="iwStart" step="0.01"><button class="sm" data-act="start:-0.05">−50</button><button class="sm" data-act="start:-0.01">−10</button><button class="sm" data-act="start:0.01">+10</button><button class="sm" data-act="start:0.05">+50</button></div>
+          <div class="row"><label class="l">end</label><input type="number" id="iwEnd" step="0.01"><button class="sm" data-act="end:-0.05">−50</button><button class="sm" data-act="end:-0.01">−10</button><button class="sm" data-act="end:0.01">+10</button><button class="sm" data-act="end:0.05">+50</button></div>
+          <div class="row"><label class="l">word</label><input type="text" id="iwText"></div>
+          <div class="row" style="margin-top:9px"><button class="sm" id="setStart">Start = playhead <kbd>S</kbd></button><button class="sm" id="setEnd">End = playhead <kbd>E</kbd></button><button class="sm" id="resetWord">Reset</button></div>
+        </div>
+        <div class="sec"><h4>Shift timing</h4>
+          <div class="row"><label class="l">by</label><input type="number" id="shiftAmt" value="0.05" step="0.01" min="0"><span class="dim">seconds</span></div>
+          <div class="row"><button class="sm" data-shift="line:-1">◀ line</button><button class="sm" data-shift="line:1">line ▶</button><button class="sm" data-shift="rest:-1">◀ line + rest</button><button class="sm" data-shift="rest:1">line + rest ▶</button></div>
+          <div class="row"><label class="chk"><input type="checkbox" id="ripple">ripple: dragging a word moves the words after it</label></div>
+          <div class="row"><button class="sm" id="resetLine">Reset line</button></div>
+        </div>
+        <div class="sec"><h4>Checks</h4><div id="warns" class="hint" style="margin:0">—</div></div>
+      </div>
+      <!-- STYLE -->
+      <div class="pane" id="p-style" hidden>
+        <div id="styleCustom" class="empty" hidden>This project uses its own hand-built scenes, so styles don't apply. You can still change lyrics, timing and colour, and export.</div>
+        <div id="styleBox">
+          <div class="sec"><h4>Template</h4><div class="mini" id="sTemplates"></div></div>
+          <div class="sec"><h4>Title card</h4>
+            <div class="row"><label class="l">title</label><input type="text" id="sTitle"></div>
+            <div class="row"><label class="l">artist</label><input type="text" id="sArtist"></div></div>
+          <div class="sec"><h4>Format</h4><select id="sAspect" style="width:100%"></select></div>
+          <div class="sec"><h4>Colours <button class="sm ghost" id="sColReset" style="margin-left:auto;text-transform:none;letter-spacing:0">template colours</button></h4>
+            <div class="swatches"><label><input type="color" id="c_bg1">Back 1</label><label><input type="color" id="c_bg2">Back 2</label><label><input type="color" id="c_text">Text</label><label><input type="color" id="c_accent">Accent</label></div></div>
+          <div class="sec"><h4>Text</h4>
+            <div class="row"><label class="l">font</label><select id="sFont" style="flex:1"></select></div>
+            <div class="row"><label class="l">case</label><select id="sCase" style="flex:1"><option value="">template default</option><option value="as">as typed</option><option value="upper">UPPERCASE</option><option value="lower">lowercase</option></select></div>
+            <div class="row"><label class="l">position</label><select id="sPos" style="flex:1"><option value="upper">upper</option><option value="center">centre</option><option value="lower">lower third</option></select></div>
+            <div class="sl"><span>Size</span><input type="range" id="sSize" min="0.5" max="1.8" step="0.01"><output></output></div></div>
+          <div class="sec"><h4>Extras</h4>
+            <div class="row"><label class="chk"><input type="checkbox" id="o_logo_intro">logo intro</label><label class="chk"><input type="checkbox" id="o_title_card">title card</label><label class="chk"><input type="checkbox" id="o_logo_outro">logo outro</label></div>
+            <div class="row"><label class="chk"><input type="checkbox" id="o_watermark">corner logo</label><label class="chk"><input type="checkbox" id="o_particles">particles</label><label class="chk"><input type="checkbox" id="o_visualizer">audio bars</label></div>
+            <div class="sl"><span>Beat pulse</span><input type="range" id="sPulse" min="0" max="1" step="0.01"><output></output></div></div>
+          <div class="sec"><h4>Background image</h4>
+            <div class="row"><button class="sm" id="bgPick">Choose image…</button><button class="sm ghost" id="bgClear">Remove</button><input type="file" id="bgFile" accept="image/*" hidden></div>
+            <div class="sl"><span>Darken</span><input type="range" id="sDim" min="0" max="0.95" step="0.01"><output></output></div></div>
+          <div class="sec"><h4>Logo</h4>
+            <div class="row"><img id="logoPrev" style="height:44px;background:#000;border-radius:6px;padding:4px"><button class="sm" id="logoPick">Replace…</button><button class="sm ghost" id="logoReset">ADx logo</button><input type="file" id="logoFile" accept="image/png,image/*" hidden></div></div>
+        </div>
+      </div>
+      <!-- LOOK -->
+      <div class="pane" id="p-look" hidden>
+        <div class="sec"><h4>Looks</h4><div class="row" id="lookPresets"></div></div>
+        <div class="sec" id="sliders"><h4>Adjust</h4></div>
+        <div class="sec"><div class="row"><button class="sm" id="lookReset">Reset</button><button class="sm" id="lookBA">Hold to compare <kbd>B</kbd></button></div>
+          <p class="hint">Applied on top of the style, in previews and every render.</p></div>
+      </div>
+      <!-- EXPORT -->
+      <div class="pane" id="p-export" hidden>
+        <div class="sec"><h4>Render video</h4><div id="presetList"></div>
+          <div class="row" style="margin-top:4px"><label class="chk"><input type="radio" name="rng" value="all" checked>whole song</label><label class="chk"><input type="radio" name="rng" value="io">in → out</label><label class="chk"><input type="radio" name="rng" value="line">selected line</label></div>
+          <p class="hint" id="rngText"></p>
+          <div class="row" style="margin-top:10px"><button class="primary" id="btnRender">Render</button><button id="btnCancel" hidden>Cancel</button></div>
+          <div id="rprog" hidden><div class="bar"><i id="rbar"></i></div><p class="hint" id="rtext"></p></div></div>
+        <div class="sec"><h4>Your renders</h4><div class="rlist" id="rlist"><span class="hint">None yet.</span></div></div>
+        <div class="sec"><h4>Performance</h4><div class="row"><label class="l">workers</label><input type="number" id="workers" min="1" max="12" style="width:64px"></div><p class="hint" id="sysText"></p></div>
+        <div class="sec"><h4>More</h4><div class="row"><button class="sm" id="btnSnap">Save current frame (full res)</button><button class="sm" id="btnExport">Export project zip</button></div>
+          <div class="row" style="margin-top:9px"><button class="sm" id="btnAudio">Replace song…</button><input type="file" id="fileAudio" accept="audio/*,.mp3,.wav,.m4a" hidden></div></div>
+      </div>
+    </aside>
+
+    <section id="stage">
+      <div id="preview">
+        <canvas id="view"></canvas>
+        <video id="vid" controls hidden></video>
+        <div id="pvmsg" class="badge" hidden></div><div id="pvinfo" class="badge"></div><div id="ba" class="badge" hidden>BEFORE</div>
+        <button id="closevid" hidden>Back to preview</button>
+      </div>
+      <div id="transport">
+        <div class="grp"><button id="btnPlay">▶</button></div>
+        <div class="grp"><button class="sm" id="frPrev" title="Previous frame (,)">◀▮</button><button class="sm" id="frNext" title="Next frame (.)">▮▶</button>
+          <span id="clock">0:00.00</span><input type="text" id="goto" placeholder="go to 1:02 / f123" style="width:120px"></div>
+        <div class="grp"><button class="sm" id="setIn" title="I">In</button><button class="sm" id="setOut" title="O">Out</button><button class="sm ghost" id="clrIO" title="Clear in/out">✕</button></div>
+        <div class="grp"><select id="quality" title="Preview quality"><option value="fast">Preview: low-res (fastest)</option><option value="balanced" selected>Preview: balanced</option><option value="sharp">Preview: sharp</option></select>
+          <label class="chk dim" title="Draw frames while the song plays"><input type="checkbox" id="live" checked>live</label></div>
+      </div>
+    </section>
+
+    <section id="tl">
+      <div id="tlbar"><button class="sm" id="zoomOut">−</button><button class="sm" id="zoomIn">+</button><button class="sm" id="zoomFit">fit</button>
+        <span>drag a word to move it · drag its edges to resize · click empty space to seek</span><span class="sp"></span><span id="ioText"></span></div>
+      <div id="cvwrap"><canvas id="cv"></canvas></div>
+    </section>
+  </div>
+</div>
+<audio id="aud" preload="auto"></audio>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+const r3 = x => Math.round(x * 1000) / 1000, clampv = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const sleep = ms => new Promise(r => setTimeout(r, ms)), fmt = t => t.toFixed(2);
+const mmss = t => { const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(2); };
+const FPS = 60;
+async function api(url, opt) {
+  const r = await fetch(url, opt);
+  if (!r.ok) { let m = r.statusText; try { m = (await r.json()).error || m; } catch (e) {} throw new Error(m); }
+  return r;
+}
+const postJSON = (url, obj) => api(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(obj) });
+let toastT; function toast(m, ms) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => t.style.display = 'none', ms || 6000); }
+function setStatus(m, c) { const s = $('#status'); s.textContent = m; s.className = c || ''; }
+let TPL = {}, FONTS = [];
+const ASPECTS = [['16:9', 'YouTube', 32, 18], ['9:16', 'Reels / Shorts', 14, 25], ['1:1', 'Square', 22, 22], ['4:5', 'Instagram', 20, 25], ['21:9', 'Cinema', 36, 15]];
+
+// ================================================================ HOME
+async function showHome() {
+  await leaveEditor();
+  $('#editor').hidden = true; $('#home').hidden = false; document.title = 'ADx Studio';
+  const list = await (await api('/api/projects')).json();
+  const g = $('#pgrid'); g.innerHTML = '';
+  const nc = document.createElement('div'); nc.className = 'card new'; nc.innerHTML = '<div class="plus">+</div>New video'; nc.onclick = openWizard; g.appendChild(nc);
+  list.forEach(p => {
+    const c = document.createElement('div'); c.className = 'card';
+    const th = document.createElement('div'); th.className = 'th';
+    if (p.kind === 'template' && TPL[p.template]) th.style.backgroundImage = `url(/static/templates/${p.template}.jpg)`; else th.innerHTML = '<img src="/static/logo_small.png">';
+    const meta = document.createElement('div'); meta.className = 'meta';
+    const b = document.createElement('b'); b.textContent = p.title; const s = document.createElement('span');
+    s.textContent = [p.artist, p.kind === 'template' ? (TPL[p.template] || {}).name : 'custom film', p.aspect, p.audio ? '' : 'no song yet'].filter(Boolean).join(' · ');
+    meta.append(b, s);
+    const del = document.createElement('button'); del.className = 'sm del'; del.textContent = 'Delete';
+    del.onclick = async ev => { ev.stopPropagation(); if (!confirm(`Delete “${p.title}”? It is moved to Projects/.deleted.`)) return; await api(`/api/p/${p.name}/delete`, { method: 'POST' }); showHome(); };
+    c.append(th, meta, del); c.onclick = () => openProject(p.name); g.appendChild(c);
+  });
+}
+$('#hNew').onclick = () => openWizard();
+$('#hImport').onclick = () => $('#fileZip').click();
+$('#fileZip').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const r = await (await api('/api/import?filename=' + encodeURIComponent(f.name), { method: 'POST', body: f })).json(); toast('Imported “' + r.name + '”.'); openProject(r.name); }
+  catch (err) { toast('Import failed: ' + err.message); }
+};
+$('#hQuit').onclick = async () => { if (!confirm('Quit ADx Studio?')) return; await api('/api/quit', { method: 'POST' }).catch(() => {}); document.body.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#8b8984;font:15px system-ui">ADx Studio has stopped. You can close this window.</div>'; };
+
+// ================================================================ WIZARD
+let W = { audio: null, aspect: '16:9', template: 'ink' };
+function openWizard() {
+  W = { audio: null, aspect: '16:9', template: 'ink' };
+  $('#wName').value = ''; $('#wArtist').value = 'ADx'; $('#wLyrics').value = ''; $('#wDrop').textContent = 'Drop an MP3/WAV here or click to choose'; $('#wDrop').classList.remove('ok');
+  wStep(1); $('#wiz').hidden = false; setTimeout(() => $('#wName').focus(), 50);
+}
+function wStep(n) {
+  $('#w1').hidden = n !== 1; $('#w2').hidden = n !== 2; $('#wBack').hidden = n === 1;
+  $$('#wiz .steps span').forEach((s, i) => s.classList.toggle('on', i < n));
+  $('#wNext').textContent = n === 1 ? 'Next: choose a style' : 'Create video'; $('#wNext').dataset.step = n; $('#wMsg').textContent = '';
+  if (n === 2) buildWizardPickers();
+}
+function buildWizardPickers() {
+  const a = $('#wAspects'); a.innerHTML = '';
+  ASPECTS.forEach(([k, label, w, h]) => { const b = document.createElement('button'); b.className = k === W.aspect ? 'act' : ''; b.innerHTML = `<i style="width:${w}px;height:${h}px"></i><span>${label}</span><small class="dim">${k}</small>`; b.onclick = () => { W.aspect = k; buildWizardPickers(); }; a.appendChild(b); });
+  const g = $('#wTemplates'); g.innerHTML = '';
+  Object.entries(TPL).forEach(([k, t]) => { const c = document.createElement('div'); c.className = 'tcard' + (k === W.template ? ' act' : ''); c.innerHTML = `<img src="/static/templates/${k}.jpg"><div><b></b><p></p></div>`; c.querySelector('b').textContent = t.name; c.querySelector('p').textContent = t.desc; c.onclick = () => { W.template = k; buildWizardPickers(); }; g.appendChild(c); });
+}
+$('#wClose').onclick = () => $('#wiz').hidden = true;
+$('#wBack').onclick = () => wStep(1);
+$('#wDrop').onclick = () => $('#wAudio').click();
+const takeAudio = f => { if (!f) return; W.audio = f; $('#wDrop').textContent = '♪ ' + f.name; $('#wDrop').classList.add('ok'); if (!$('#wName').value) $('#wName').value = f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' '); };
+$('#wAudio').onchange = e => takeAudio(e.target.files[0]);
+$('#wDrop').ondragover = e => { e.preventDefault(); $('#wDrop').classList.add('ok'); };
+$('#wDrop').ondrop = e => { e.preventDefault(); takeAudio(e.dataTransfer.files[0]); };
+$('#wNext').onclick = async () => {
+  if ($('#wNext').dataset.step === '1') {
+    if (!W.audio) { $('#wMsg').textContent = 'Choose the song file first.'; return; }
+    if (!$('#wLyrics').value.trim()) { $('#wMsg').textContent = 'Paste the lyrics first.'; return; }
+    wStep(2); return;
+  }
+  $('#wNext').disabled = true; $('#wMsg').textContent = 'Creating project…';
+  try {
+    const r = await (await postJSON('/api/new', { title: $('#wName').value, artist: $('#wArtist').value, lyrics: $('#wLyrics').value, template: W.template, aspect: W.aspect })).json();
+    $('#wMsg').textContent = 'Uploading and analysing the song (tempo, beats, loudness)…';
+    await api(`/api/p/${r.name}/audio`, { method: 'POST', body: W.audio });
+    $('#wiz').hidden = true; await openProject(r.name, 'sync');
+    if ($('#wAuto').checked) startAutoSync();
+    else toast('Done. The lyrics are spread roughly over the song. Use Auto sync or Tap sync to line them up.', 9000);
+  } catch (e) { $('#wMsg').textContent = 'Failed: ' + e.message; }
+  $('#wNext').disabled = false;
+};
+
+// ================================================================ EDITOR STATE
+let S = { name: null, dur: 0, lines: [], words: [], orig: [], vocal: [], fps: 100, t0: 0, beat: .43, sections: [], audio: false, root: '', kind: 'custom', settings: {} };
+let LW = [], origMap = new Map();
+let sel = -1, ph = 0, vs = 0, pps = 100, mIn = null, mOut = null;
+let undoStack = [], redoStack = [], dirty = false, saving = false, saveTimer = null;
+let playing = false, wall0 = 0, base0 = 0, raf = 0, curWord = -1, curLine = -1;
+const aud = $('#aud');
+const isT = () => S.kind === 'template';
+function indexLines() { LW = S.lines.map(() => []); S.words.forEach((w, i) => LW[w.line].push(i)); }
+const isEdited = w => { const o = origMap.get(w.line + ':' + w.wi); return !o || o.text !== w.text || Math.abs(o.start - w.start) > .004 || Math.abs(o.end - w.end) > .004; };
+
+async function openProject(name, step) {
+  pausePlay();
+  const d = await (await api(`/api/p/${name}/data`)).json();
+  S = d; origMap = new Map(d.orig.map(w => [w.line + ':' + w.wi, w]));
+  undoStack = []; redoStack = []; updUndoUI(); dirty = false; sel = -1; ph = 0; vs = 0; mIn = mOut = null; curWord = curLine = -1;
+  aud.src = S.audio ? `/api/p/${name}/audio?v=${Date.now()}` : '';
+  LOOK = await (await api(`/api/p/${name}/look`)).json(); syncSliders();
+  $('#home').hidden = true; $('#editor').hidden = false;
+  const title = isT() ? (S.settings.title || name) : name;
+  $('#ptitle').textContent = title; document.title = title + ' · ADx Studio';
+  $('#lyrEditBox').hidden = !isT(); $('#lyrText').value = isT() ? S.lines.join('\n') : '';
+  $('#styleCustom').hidden = isT(); $('#styleBox').hidden = !isT();
+  if (isT()) syncStyleUI();
+  indexLines(); renderLines(); updInspector(); updIO();
+  requestAnimationFrame(() => { resizeCv(); pps = Math.max(40, cvw / 22); draw(); });
+  updClock(); setStatus(S.audio ? `${S.words.length} words` : 'No song loaded', S.audio ? '' : 'warn');
+  try { localStorage.setItem('adx_last', name); } catch (e) {}
+  gotoStep(step || 'lyrics');
+  requestFrame('settle', 0); refreshRenders();
+}
+async function leaveEditor() { if (S.name) { await saveNow(); await saveLookNow(); await saveStyleNow(); } pausePlay(); }
+$('#eHome').onclick = () => showHome();
+
+function gotoStep(st) {
+  $$('#stepnav button').forEach(b => b.classList.toggle('act', b.dataset.step === st));
+  $$('#side .pane').forEach(p => p.hidden = p.id !== 'p-' + st);
+  if (st === 'export') refreshRenders();
+}
+$$('#stepnav button').forEach(b => b.onclick = () => gotoStep(b.dataset.step));
+
+// ================================================================ UNDO / SAVE
+const snap = () => JSON.stringify({ lines: S.lines, words: S.words });
+function updUndoUI() { $('#btnUndo').disabled = !undoStack.length; $('#btnRedo').disabled = !redoStack.length; }
+function pushUndo() { undoStack.push(snap()); if (undoStack.length > 150) undoStack.shift(); redoStack = []; updUndoUI(); }
+function restore(str) { const o = JSON.parse(str); S.lines = o.lines; S.words = o.words; indexLines(); sel = Math.min(sel, S.words.length - 1); renderLines(); afterEdit(); }
+function doUndo() { if (!undoStack.length) return; redoStack.push(snap()); restore(undoStack.pop()); updUndoUI(); }
+function doRedo() { if (!redoStack.length) return; undoStack.push(snap()); restore(redoStack.pop()); updUndoUI(); }
+$('#btnUndo').onclick = doUndo; $('#btnRedo').onclick = doRedo;
+function afterEdit() { dirty = true; refreshTs(); updChips(); updInspector(); draw(); scheduleSave(); requestFrame('settle'); }
+function scheduleSave() { setStatus('Unsaved…', 'warn'); clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 600); }
+async function saveNow() {
+  clearTimeout(saveTimer); if (!dirty || !S.name) return;
+  if (saving) { scheduleSave(); return; }
+  saving = true; dirty = false;
+  try { await postJSON(`/api/p/${S.name}/save`, { lines: S.lines, words: S.words }); if (!dirty) setStatus('Saved', 'ok'); }
+  catch (e) { dirty = true; setStatus('Save failed', 'err'); toast('Save failed: ' + e.message); }
+  saving = false;
+}
+window.addEventListener('beforeunload', e => { if (dirty || saving) { e.preventDefault(); e.returnValue = ''; } });
+
+// ================================================================ LYRICS
+function renderLines() {
+  const host = $('#lines'); host.innerHTML = '';
+  S.lines.forEach((txt, li) => {
+    const el = document.createElement('div'); el.className = 'line'; el.dataset.li = li;
+    el.innerHTML = '<div class="lh"><span class="ln"></span><input class="lt" type="text" spellcheck="false"><span class="ts"></span></div><div class="chips"></div>';
+    el.querySelector('.ln').textContent = li + 1;
+    const inp = el.querySelector('.lt'); inp.value = txt;
+    inp.addEventListener('focus', () => selectLine(li));
+    inp.addEventListener('change', () => commitText(li, inp.value));
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+    const chips = el.querySelector('.chips');
+    LW[li].forEach(wi => { const c = document.createElement('span'); c.className = 'chip'; c.dataset.i = wi; c.textContent = S.words[wi].text; chips.appendChild(c); });
+    host.appendChild(el);
+  });
+  host.onclick = e => { const c = e.target.closest('.chip'); if (c) selectWord(+c.dataset.i, true); };
+  refreshTs(); updChips();
+}
+function refreshTs() {
+  $$('#lines .line').forEach(el => {
+    const idx = LW[+el.dataset.li]; if (!idx || !idx.length) return;
+    el.querySelector('.ts').textContent = mmss(S.words[idx[0]].start);
+    el.querySelectorAll('.chip').forEach((c, k) => { if (idx[k] !== undefined) { c.dataset.i = idx[k]; c.textContent = S.words[idx[k]].text; } });
+  });
+}
+function updChips() {
+  $$('#lines .chip').forEach(c => { const i = +c.dataset.i, w = S.words[i]; if (!w) return; c.classList.toggle('sel', i === sel); c.classList.toggle('cur', i === curWord); c.classList.toggle('ed', isEdited(w)); });
+  $$('#lines .line').forEach(l => { const li = +l.dataset.li; l.classList.toggle('selline', sel >= 0 && S.words[sel] && S.words[sel].line === li); l.classList.toggle('cur', li === curLine); });
+}
+function selectLine(li) { const idx = LW[li]; if (idx && idx.length) selectWord(idx[0], true, true); }
+function selectWord(i, seek, keepScroll) {
+  sel = i; updChips(); updInspector(); updRangeText();
+  const w = S.words[i];
+  if (!keepScroll) { const el = document.querySelector(`#lines .line[data-li="${w.line}"]`); if (el) el.scrollIntoView({ block: 'nearest' }); }
+  if (seek) setPlayhead(w.start);
+  if (w.start < vs || w.end > vs + cvw / pps) vs = Math.max(0, w.start - (cvw / pps) * .25);
+  draw(); updTapUI();
+}
+function commitText(li, val) {
+  const toks = val.trim().split(/\s+/).filter(Boolean), idxs = LW[li], inp = document.querySelector(`#lines .line[data-li="${li}"] .lt`);
+  if (!toks.length) { inp.value = S.lines[li]; toast('A line cannot be empty.'); return; }
+  if (toks.join(' ') === S.lines[li]) { inp.value = S.lines[li]; return; }
+  pushUndo();
+  if (toks.length === idxs.length) { idxs.forEach((wi, k) => S.words[wi].text = toks[k]); S.lines[li] = toks.join(' '); afterEdit(); syncLyrText(); return; }
+  const first = S.words[idxs[0]].start, last = S.words[idxs[idxs.length - 1]].end, wts = toks.map(t => t.length + 1.5), tot = wts.reduce((a, b) => a + b, 0);
+  let cur = first; const nw = [];
+  toks.forEach((t, k) => { const len = (last - first) * wts[k] / tot; nw.push({ line: li, wi: k, text: t, start: r3(cur), end: r3(Math.max(cur + .06, cur + len - .02)) }); cur += len; });
+  S.words.splice(idxs[0], idxs.length, ...nw); S.lines[li] = toks.join(' ');
+  indexLines(); sel = idxs[0]; renderLines(); afterEdit(); syncLyrText();
+  if (!isT()) toast(`Line ${li + 1} now has ${toks.length} words. Timing was spread evenly; this film's scenes style words by position, so check the preview.`, 9000);
+}
+function syncLyrText() { if (isT()) $('#lyrText').value = S.lines.join('\n'); }
+$('#lyrApply').onclick = async () => {
+  await saveNow(); setStatus('Updating lyrics…', 'warn');
+  try { await postJSON(`/api/p/${S.name}/lyrics`, { lyrics: $('#lyrText').value }); await openProject(S.name, 'lyrics'); toast('Lyrics updated. New or changed lines got rough timing: sync them in step 2.', 7000); }
+  catch (e) { toast(e.message); setStatus('', ''); }
+};
+
+// ================================================================ SYNC
+function updInspector() {
+  const w = S.words[sel], dis = !w;
+  ['iwText', 'iwStart', 'iwEnd', 'setStart', 'setEnd', 'resetWord', 'resetLine'].forEach(id => $('#' + id).disabled = dis);
+  $$('[data-act],[data-shift]').forEach(b => b.disabled = dis);
+  if (w) {
+    $('#iwLabel').textContent = `Line ${w.line + 1}, word ${w.wi + 1}: “${w.text}” · ${fmt(w.end - w.start)} s`;
+    if (document.activeElement !== $('#iwText')) $('#iwText').value = w.text;
+    if (document.activeElement !== $('#iwStart')) $('#iwStart').value = w.start.toFixed(3);
+    if (document.activeElement !== $('#iwEnd')) $('#iwEnd').value = w.end.toFixed(3);
+  } else { $('#iwLabel').textContent = 'Click a word on the timeline below.'; $('#iwText').value = $('#iwStart').value = $('#iwEnd').value = ''; }
+  const ws = warnings(), box = $('#warns'); box.innerHTML = '';
+  if (!ws.length) box.textContent = 'No timing problems found.';
+  ws.slice(0, 8).forEach(([i, m]) => { const d = document.createElement('div'); d.textContent = `Line ${S.words[i].line + 1} “${S.words[i].text}”: ${m}`; d.onclick = () => selectWord(i, true); box.appendChild(d); });
+}
+function warnings() {
+  const out = [], Wd = S.words;
+  for (let i = 0; i < Wd.length; i++) {
+    const w = Wd[i];
+    if (w.end - w.start < .04) out.push([i, 'shorter than 40 ms']);
+    if (i && w.start < Wd[i - 1].start) out.push([i, 'starts before the previous word']);
+    else if (i && w.start < Wd[i - 1].end - .25) out.push([i, 'overlaps the previous word']);
+  }
+  return out;
+}
+function setWordTimes(i, s, e) {
+  const Wd = S.words, p = Wd[i - 1], n = Wd[i + 1];
+  s = Math.max(p ? p.start + .02 : 0, s); e = Math.min(n ? n.end - .02 : S.dur, e);
+  if (e < s + .04) e = s + .04; Wd[i].start = r3(s); Wd[i].end = r3(e);
+}
+function edit(fn) { pushUndo(); fn(); afterEdit(); }
+$('#iwText').onchange = e => {
+  const v = e.target.value.trim(); if (!v || /\s/.test(v)) { toast('A word is one token. To split it, edit the whole line in Lyrics.'); updInspector(); return; }
+  edit(() => { const w = S.words[sel]; w.text = v; S.lines[w.line] = LW[w.line].map(k => S.words[k].text).join(' '); const inp = document.querySelector(`#lines .line[data-li="${w.line}"] .lt`); if (inp) inp.value = S.lines[w.line]; syncLyrText(); });
+};
+$('#iwStart').onchange = e => edit(() => { const w = S.words[sel], v = parseFloat(e.target.value); if (isFinite(v)) setWordTimes(sel, v, Math.max(w.end, v + .04)); });
+$('#iwEnd').onchange = e => edit(() => { const w = S.words[sel], v = parseFloat(e.target.value); if (isFinite(v)) setWordTimes(sel, w.start, v); });
+$$('[data-act]').forEach(b => b.onclick = () => { const [f, d] = b.dataset.act.split(':'), dv = +d; edit(() => { const w = S.words[sel]; f === 'start' ? setWordTimes(sel, w.start + dv, w.end) : setWordTimes(sel, w.start, w.end + dv); }); });
+function setStartHere() { if (sel < 0) return; edit(() => { const w = S.words[sel]; setWordTimes(sel, ph, Math.max(w.end, ph + (w.end - w.start))); }); }
+function setEndHere() { if (sel < 0) return; edit(() => setWordTimes(sel, S.words[sel].start, Math.max(ph, S.words[sel].start + .04))); }
+$('#setStart').onclick = setStartHere; $('#setEnd').onclick = setEndHere;
+const resetW = i => { const w = S.words[i], o = origMap.get(w.line + ':' + w.wi); if (o) { w.start = o.start; w.end = o.end; } };
+$('#resetWord').onclick = () => edit(() => resetW(sel));
+$('#resetLine').onclick = () => edit(() => LW[S.words[sel].line].forEach(resetW));
+function shiftWords(idxs, dt) {
+  let lo = Infinity, hi = -Infinity; idxs.forEach(i => { lo = Math.min(lo, S.words[i].start); hi = Math.max(hi, S.words[i].end); });
+  dt = clampv(dt, -lo, S.dur - hi); idxs.forEach(i => { S.words[i].start = r3(S.words[i].start + dt); S.words[i].end = r3(S.words[i].end + dt); });
+}
+$$('[data-shift]').forEach(b => b.onclick = () => {
+  const [mode, dir] = b.dataset.shift.split(':'), amt = (parseFloat($('#shiftAmt').value) || .05) * +dir, li = S.words[sel].line;
+  edit(() => shiftWords(mode === 'line' ? LW[li].slice() : S.words.map((w, i) => i).filter(i => S.words[i].line >= li), amt));
+});
+
+// ---- tap sync
+let tap = null;   // {mode, idx}
+const tapMode = () => (document.querySelector('input[name=tapmode]:checked') || {}).value || 'line';
+function updTapUI() {
+  if (!S.name) return;
+  const m = tap ? tap.mode : tapMode();
+  if (m === 'line') {
+    const li = tap ? tap.idx : (sel >= 0 ? S.words[sel].line : 0);
+    $('#tapNow').textContent = tap ? (li < S.lines.length ? S.lines[li] : 'All lines done') : 'Press Start, then tap as each line begins';
+    $('#tapNext').textContent = tap && li + 1 < S.lines.length ? 'then: ' + S.lines[li + 1] : '';
+    $('#tapCount').textContent = tap ? `LINE ${Math.min(li + 1, S.lines.length)} / ${S.lines.length}` : '';
+  } else {
+    const wi = tap ? tap.idx : Math.max(0, sel);
+    $('#tapNow').textContent = tap ? (wi < S.words.length ? S.words[wi].text : 'All words done') : 'Press Start, then tap on each word';
+    $('#tapNext').textContent = tap && wi < S.words.length ? S.lines[S.words[wi].line] : '';
+    $('#tapCount').textContent = tap ? `WORD ${Math.min(wi + 1, S.words.length)} / ${S.words.length}` : '';
+  }
+  $('#tapBtn').textContent = tap ? 'TAP  (T)' : 'Start tap sync';
+}
+function startTap() {
+  if (!S.audio) { toast('Load the song first (Export → Replace song).'); return; }
+  const m = tapMode();
+  let idx = m === 'line' ? (sel >= 0 ? S.words[sel].line : 0) : Math.max(0, sel);
+  const from = m === 'line' ? (idx > 0 ? S.words[LW[idx - 1][0]].start : 0) : (idx > 0 ? S.words[idx - 1].start : 0);
+  pushUndo(); tap = { mode: m, idx };
+  setPlayhead(Math.max(0, from - 0.5)); startPlay(); updTapUI();
+}
+function stopTap() { if (!tap) return; tap = null; pausePlay(); updTapUI(); afterEdit(); toast('Tap sync stopped. Fine-tune any word by dragging it on the timeline.', 4000); }
+function doTap() {
+  if (!tap) { startTap(); return; }
+  const t = ph;
+  if (tap.mode === 'line') {
+    const li = tap.idx; if (li >= S.lines.length) { stopTap(); return; }
+    const idx = LW[li], a = S.words[idx[0]].start, b = S.words[idx[idx.length - 1]].end, d = Math.max(.3, b - a);
+    let dd = d;
+    if (li + 1 < S.lines.length) { const ns = S.words[LW[li + 1][0]].start; if (ns > t) dd = Math.min(d, Math.max(.3, ns - t - .05)); }
+    idx.forEach(i => { const w = S.words[i]; w.start = r3(t + (w.start - a) / d * dd); w.end = r3(t + (w.end - a) / d * dd); });
+    if (li > 0) {
+      const pidx = LW[li - 1], pa = S.words[pidx[0]].start, pb = S.words[pidx[pidx.length - 1]].end;
+      if (pb > t - .05 && pa < t - .1) { const k = (t - .05 - pa) / (pb - pa); pidx.forEach(i => { const w = S.words[i]; w.start = r3(pa + (w.start - pa) * k); w.end = r3(pa + (w.end - pa) * k); }); }
+    }
+    tap.idx++;
+  } else {
+    const wi = tap.idx; if (wi >= S.words.length) { stopTap(); return; }
+    const w = S.words[wi], d = Math.max(.08, w.end - w.start);
+    w.start = r3(t); w.end = r3(t + d);
+    if (wi > 0) { const p = S.words[wi - 1]; if (p.end > t - .02 || p.line === w.line) p.end = r3(Math.max(p.start + .04, t - .02)); }
+    tap.idx++;
+  }
+  dirty = true; refreshTs(); updChips(); draw(); updTapUI(); scheduleSave();
+}
+$('#tapBtn').onclick = () => doTap();
+$$('input[name=tapmode]').forEach(r => r.onchange = updTapUI);
+
+// ---- auto sync
+let asTimer = null;
+async function startAutoSync() {
+  if (!S.name) return;
+  if (!S.audio) { toast('Load the song first (Export → Replace song).'); return; }
+  gotoStep('sync'); await saveNow();
+  $('#asBtn').disabled = true; $('#asProg').hidden = false; $('#asBar').style.width = '0%'; $('#asText').textContent = 'Starting…';
+  const name = S.name;
+  try {
+    const r = await (await api(`/api/p/${name}/autosync`, { method: 'POST' })).json();
+    clearInterval(asTimer);
+    asTimer = setInterval(async () => {
+      try {
+        const j = await (await api(`/api/p/${name}/autosync/${r.job}`)).json();
+        $('#asBar').style.width = Math.round(j.frac * 100) + '%'; $('#asText').textContent = `${j.msg} (${Math.round(j.elapsed)} s)`;
+        if (j.stage === 'done' || j.stage === 'error') {
+          clearInterval(asTimer); $('#asBtn').disabled = false;
+          if (j.stage === 'done') {
+            if (S.name === name) { const keep = ph; await openProject(name, 'sync'); setPlayhead(keep); }
+            toast('Auto sync finished: ' + j.msg + '. Press play to check it. Your previous timing was kept in analysis/timeline_before_autosync.json.', 9000);
+            $('#asText').textContent = 'Done in ' + Math.round(j.elapsed) + ' s';
+          } else { $('#asText').textContent = 'Auto sync failed: ' + j.msg; }
+        }
+      } catch (e) { clearInterval(asTimer); $('#asBtn').disabled = false; $('#asText').textContent = 'Lost track of auto sync: ' + e.message; }
+    }, 1000);
+  } catch (e) { $('#asBtn').disabled = false; $('#asText').textContent = e.message; }
+}
+$('#asBtn').onclick = () => startAutoSync();
+
+// ================================================================ STYLE
+const STYLE_COLORS = ['bg1', 'bg2', 'text', 'accent'];
+const OPTS = ['logo_intro', 'title_card', 'logo_outro', 'watermark', 'particles', 'visualizer'];
+const optDefault = { logo_intro: true, title_card: true, logo_outro: true, watermark: true, particles: true, visualizer: false };
+function stg(k) { const v = S.settings[k]; return v === undefined || v === '' ? null : v; }
+function syncStyleUI() {
+  const s = S.settings, tp = TPL[s.template] || TPL.ink;
+  const g = $('#sTemplates'); g.innerHTML = '';
+  Object.entries(TPL).forEach(([k, t]) => { const c = document.createElement('div'); c.className = 'tcard' + (k === s.template ? ' act' : ''); c.title = t.desc; c.innerHTML = `<img src="/static/templates/${k}.jpg"><div><b></b></div>`; c.querySelector('b').textContent = t.name; c.onclick = () => setStyle({ template: k }, true); g.appendChild(c); });
+  $('#sTitle').value = s.title || ''; $('#sArtist').value = s.artist || '';
+  $('#sAspect').innerHTML = ASPECTS.map(([k, l]) => `<option value="${k}">${l} · ${k}</option>`).join(''); $('#sAspect').value = s.aspect || '16:9';
+  STYLE_COLORS.forEach(k => $('#c_' + k).value = stg(k) || tp[k]);
+  $('#sFont').innerHTML = `<option value="">template default (${tp.font})</option>` + FONTS.map(f => `<option>${f}</option>`).join(''); $('#sFont').value = s.font || '';
+  $('#sCase').value = s.case || ''; $('#sPos').value = s.position || 'center';
+  setSl('#sSize', s.size || 1); setSl('#sPulse', s.pulse === undefined ? .5 : s.pulse); setSl('#sDim', s.bg_dim === undefined ? .55 : s.bg_dim);
+  OPTS.forEach(k => $('#o_' + k).checked = s[k] === undefined ? optDefault[k] : !!s[k]);
+  $('#logoPrev').src = `/api/p/${S.name}/asset/${(s.logo || 'assets/logo.png').split('/').pop()}?v=${Date.now()}`;
+  $('#bgClear').disabled = !s.bg_image;
+}
+function setSl(sel_, v) { const i = $(sel_); i.value = v; i.nextElementSibling.value = (+v).toFixed(2); }
+let styleTimer;
+function setStyle(patch, rebuild) {
+  Object.assign(S.settings, patch);
+  if (rebuild) syncStyleUI();
+  if ('title' in patch) $('#ptitle').textContent = S.settings.title || S.name;
+  requestFrame('scrub'); requestFrame('settle', 300);
+  clearTimeout(styleTimer); styleTimer = setTimeout(saveStyleNow, 600);
+}
+async function saveStyleNow() { clearTimeout(styleTimer); if (!S.name || !isT()) return; try { await postJSON(`/api/p/${S.name}/settings`, S.settings); } catch (e) { toast('Could not save style: ' + e.message); } }
+$('#sTitle').oninput = e => setStyle({ title: e.target.value }); $('#sArtist').oninput = e => setStyle({ artist: e.target.value });
+$('#sAspect').onchange = e => setStyle({ aspect: e.target.value });
+STYLE_COLORS.forEach(k => $('#c_' + k).oninput = e => setStyle({ [k]: e.target.value }));
+$('#sColReset').onclick = () => setStyle({ bg1: '', bg2: '', text: '', accent: '' }, true);
+$('#sFont').onchange = e => setStyle({ font: e.target.value }); $('#sCase').onchange = e => setStyle({ case: e.target.value }); $('#sPos').onchange = e => setStyle({ position: e.target.value });
+[['#sSize', 'size'], ['#sPulse', 'pulse'], ['#sDim', 'bg_dim']].forEach(([id, k]) => $(id).oninput = e => { e.target.nextElementSibling.value = (+e.target.value).toFixed(2); setStyle({ [k]: +e.target.value }); });
+OPTS.forEach(k => $('#o_' + k).onchange = e => setStyle({ [k]: e.target.checked }));
+async function uploadImg(kind, f) {
+  if (!f) return; setStatus('Uploading image…', 'warn');
+  try { const r = await (await api(`/api/p/${S.name}/image?kind=${kind}&filename=${encodeURIComponent(f.name)}`, { method: 'POST', body: f })).json(); S.settings[kind === 'bg' ? 'bg_image' : 'logo'] = r.path; syncStyleUI(); requestFrame('settle', 0); setStatus('Image added', 'ok'); }
+  catch (e) { toast(e.message); setStatus('', ''); }
+}
+$('#bgPick').onclick = () => $('#bgFile').click(); $('#bgFile').onchange = e => { uploadImg('bg', e.target.files[0]); e.target.value = ''; };
+$('#bgClear').onclick = () => setStyle({ bg_image: '' }, true);
+$('#logoPick').onclick = () => $('#logoFile').click(); $('#logoFile').onchange = e => { uploadImg('logo', e.target.files[0]); e.target.value = ''; };
+$('#logoReset').onclick = () => setStyle({ logo: 'assets/logo.png' }, true);
+
+// ================================================================ LOOK
+const LOOK_KEYS = [['exposure', 'Exposure', -2, 2], ['contrast', 'Contrast', -1, 1], ['highlights', 'Highlights', -1, 1], ['blacks', 'Shadows', -1, 1],
+  ['saturation', 'Saturation', -1, 1], ['warmth', 'Warmth', -1, 1], ['tint', 'Tint', -1, 1], ['fade', 'Film fade', 0, 1], ['vignette', 'Vignette', -1, 1]];
+const LOOK_PRESETS = { 'None': {}, 'Warm': { warmth: .35, saturation: .12, contrast: .1 }, 'Cold': { warmth: -.4, tint: .05, saturation: -.15, blacks: -.1 },
+  'Punchy': { contrast: .35, saturation: .2, vignette: .3 }, 'Faded film': { fade: .6, contrast: -.15, saturation: -.25, warmth: .12 }, 'Mono': { saturation: -1, contrast: .2 }, 'Bright': { exposure: .35, highlights: -.2, blacks: .2 } };
+let LOOK = {}, showBefore = false;
+function syncSliders() { LOOK_KEYS.forEach(([k]) => { const inp = $('#lk_' + k); if (inp) { inp.value = LOOK[k] || 0; inp.nextElementSibling.value = (+inp.value).toFixed(2); } }); }
+(function () {
+  const host = $('#sliders');
+  LOOK_KEYS.forEach(([k, label, lo, hi]) => {
+    const row = document.createElement('div'); row.className = 'sl';
+    row.innerHTML = `<span>${label}</span><input type="range" id="lk_${k}" min="${lo}" max="${hi}" step="0.01" value="0"><output>0.00</output>`;
+    const inp = row.querySelector('input');
+    inp.oninput = () => { LOOK[k] = +inp.value; inp.nextElementSibling.value = (+inp.value).toFixed(2); lookChanged(); };
+    inp.ondblclick = () => { inp.value = 0; inp.oninput(); };
+    host.appendChild(row);
+  });
+  Object.entries(LOOK_PRESETS).forEach(([n, v]) => { const b = document.createElement('button'); b.className = 'sm'; b.textContent = n; b.onclick = () => { LOOK = Object.assign({}, v); syncSliders(); lookChanged(); }; $('#lookPresets').appendChild(b); });
+})();
+let lookTimer;
+function lookChanged() { requestFrame('scrub'); clearTimeout(lookTimer); lookTimer = setTimeout(saveLookNow, 700); requestFrame('settle', 350); }
+async function saveLookNow() { clearTimeout(lookTimer); if (!S.name) return; try { await postJSON(`/api/p/${S.name}/look`, LOOK); } catch (e) {} }
+$('#lookReset').onclick = () => { LOOK = {}; syncSliders(); lookChanged(); };
+const holdBA = on => { if (showBefore === on) return; showBefore = on; $('#ba').hidden = !on; requestFrame('settle', 0); };
+$('#lookBA').onpointerdown = () => holdBA(true); $('#lookBA').onpointerup = $('#lookBA').onpointerleave = () => holdBA(false);
+
+// ================================================================ PREVIEW ENGINE
+const QUALITY = { fast: { s: .15, fast: true }, balanced: { s: .3, fast: true }, sharp: { s: .6, fast: false } };
+const view = $('#view'), vctx = view.getContext('2d');
+let ticket = 0, inflight = false, pendingMode = null, settleTimer = null, lastImg = null;
+function requestFrame(mode, delay) {
+  if (!S.name) return;
+  if (mode === 'settle') { clearTimeout(settleTimer); settleTimer = setTimeout(() => queueFrame('settle'), delay === undefined ? 220 : delay); return; }
+  queueFrame('scrub');
+}
+function queueFrame(mode) { pendingMode = mode === 'settle' || pendingMode === 'settle' ? mode : 'scrub'; if (!inflight) pump(); }
+async function pump() {
+  if (!pendingMode || !S.name) return;
+  const mode = pendingMode; pendingMode = null; inflight = true;
+  const q = mode === 'scrub' ? QUALITY.fast : QUALITY[$('#quality').value];
+  const my = ++ticket, t = ph;
+  const look = showBefore ? null : (Object.values(LOOK).some(v => Math.abs(v) > 1e-4) ? LOOK : null);
+  let url = `/api/p/${S.name}/frame?t=${t.toFixed(3)}&s=${q.s}&fast=${q.fast ? 1 : 0}&ticket=${my}&look=${encodeURIComponent(JSON.stringify(look))}`;
+  if (isT()) url += '&settings=' + encodeURIComponent(JSON.stringify(S.settings));
+  try {
+    if (dirty) await saveNow(); while (saving) await sleep(30);
+    const r = await api(url);
+    if (r.status === 200) {
+      const ms = +r.headers.get('X-Render-Ms') || 0;
+      lastImg = await createImageBitmap(await r.blob()); paintView();
+      $('#pvinfo').textContent = `${lastImg.width}×${lastImg.height} · ${ms} ms`; $('#pvmsg').hidden = true;
+    }
+  } catch (e) { $('#pvmsg').hidden = false; $('#pvmsg').textContent = 'Preview unavailable: ' + e.message; pendingMode = null; }
+  inflight = false;
+  if (pendingMode) pump(); else if (playing && $('#live').checked) queueFrame('scrub');
+}
+function paintView() {
+  const r = view.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+  if (!r.width) return;
+  if (view.width !== Math.round(r.width * d) || view.height !== Math.round(r.height * d)) { view.width = Math.round(r.width * d); view.height = Math.round(r.height * d); }
+  vctx.fillStyle = '#050506'; vctx.fillRect(0, 0, view.width, view.height);
+  if (!lastImg) return;
+  const k = Math.min(view.width / lastImg.width, view.height / lastImg.height), w = lastImg.width * k, h = lastImg.height * k;
+  vctx.imageSmoothingQuality = 'high'; vctx.drawImage(lastImg, (view.width - w) / 2, (view.height - h) / 2, w, h);
+}
+new ResizeObserver(paintView).observe($('#preview'));
+$('#quality').onchange = () => requestFrame('settle', 0);
+
+// ================================================================ TRANSPORT
+function setPlayhead(t, fromAudio) {
+  ph = clampv(t, 0, S.dur || 0);
+  if (!fromAudio && S.audio) { try { aud.currentTime = ph; } catch (e) {} }
+  if (playing && !S.audio) { wall0 = performance.now(); base0 = ph; }
+  updCur(); updClock(); draw();
+  if (!playing) { requestFrame('scrub'); requestFrame('settle'); }
+}
+function updClock() { $('#clock').textContent = `${mmss(ph)} · f${Math.round(ph * FPS)}`; }
+function stepFrame(n) { pausePlay(); setPlayhead((Math.round(ph * FPS) + n) / FPS); }
+$('#frPrev').onclick = () => stepFrame(-1); $('#frNext').onclick = () => stepFrame(1);
+$('#goto').onkeydown = e => {
+  if (e.key !== 'Enter') return; const v = e.target.value.trim(); let t;
+  if (v.startsWith('f')) t = parseFloat(v.slice(1)) / FPS; else if (v.includes(':')) { const [m, s] = v.split(':'); t = (+m) * 60 + parseFloat(s); } else t = parseFloat(v);
+  if (isFinite(t)) setPlayhead(t); e.target.blur();
+};
+function updIO() { $('#ioText').textContent = mIn !== null || mOut !== null ? `in ${mIn !== null ? mmss(mIn) : '—'} → out ${mOut !== null ? mmss(mOut) : '—'}` : ''; updRangeText(); draw(); }
+$('#setIn').onclick = () => { mIn = ph; if (mOut !== null && mOut <= mIn) mOut = null; updIO(); };
+$('#setOut').onclick = () => { mOut = ph; if (mIn !== null && mIn >= mOut) mIn = null; updIO(); };
+$('#clrIO').onclick = () => { mIn = mOut = null; updIO(); };
+function updCur() {
+  let c = -1; for (let i = 0; i < S.words.length; i++) { const w = S.words[i]; if (ph >= w.start && ph <= w.end + .05) c = i; }
+  const li = c >= 0 ? S.words[c].line : curLine;
+  if (c !== curWord || li !== curLine) { curWord = c; curLine = li; updChips(); if (playing && li >= 0) { const el = document.querySelector(`#lines .line[data-li="${li}"]`); if (el) el.scrollIntoView({ block: 'nearest' }); } }
+}
+function startPlay() {
+  if (!S.name || playing) return; if (ph >= S.dur - .05) ph = 0;
+  playing = true; $('#btnPlay').textContent = '❚❚';
+  if (S.audio) { aud.currentTime = ph; aud.play().catch(() => {}); } else { wall0 = performance.now(); base0 = ph; }
+  raf = requestAnimationFrame(tick); if ($('#live').checked) queueFrame('scrub');
+}
+function pausePlay() { const was = playing; playing = false; cancelAnimationFrame(raf); aud.pause(); $('#btnPlay').textContent = '▶'; if (was) requestFrame('settle', 60); }
+function tick() {
+  if (!playing) return;
+  ph = S.audio ? aud.currentTime : base0 + (performance.now() - wall0) / 1000;
+  if (!tap && mOut !== null && mIn !== null && ph >= mOut) setPlayhead(mIn);
+  if (ph >= S.dur) { ph = S.dur; pausePlay(); if (tap) stopTap(); }
+  const span = cvw / pps; if (ph > vs + span * .88 || ph < vs) vs = Math.max(0, ph - span * .15);
+  updCur(); updClock(); draw(); raf = requestAnimationFrame(tick);
+}
+$('#btnPlay').onclick = () => playing ? (tap ? stopTap() : pausePlay()) : startPlay();
+
+// ================================================================ EXPORT
+let preset = 'hd', rjob = null, rtimer = null;
+function curRange() {
+  const m = (document.querySelector('input[name=rng]:checked') || {}).value;
+  if (m === 'io') return [mIn !== null ? mIn : 0, mOut !== null ? mOut : S.dur];
+  if (m === 'line' && sel >= 0) { const idx = LW[S.words[sel].line]; return [Math.max(0, S.words[idx[0]].start - .8), Math.min(S.dur, S.words[idx[idx.length - 1]].end + .8)]; }
+  return [0, S.dur];
+}
+function updRangeText() { if (!S.name) return; const [a, b] = curRange(); $('#rngText').textContent = `${mmss(a)} → ${mmss(b)} (${fmt(b - a)} s)`; }
+$$('input[name=rng]').forEach(r => r.onchange = updRangeText);
+async function refreshRenders() {
+  if (!S.name) return;
+  try {
+    const d = await (await api(`/api/p/${S.name}/renders`)).json();
+    const pl = $('#presetList'); pl.innerHTML = '';
+    const tag = { draft: 'quick check', hd: 'share online', final: 'master' };
+    Object.entries(d.presets).forEach(([k, label]) => {
+      const el = document.createElement('div'); el.className = 'preset' + (k === preset ? ' act' : '');
+      el.innerHTML = `<input type="radio" name="preset" ${k === preset ? 'checked' : ''}><span></span><small>${tag[k] || ''}</small>`;
+      el.querySelector('span').textContent = label; el.onclick = () => { preset = k; refreshRenders(); }; pl.appendChild(el);
+    });
+    if (!$('#workers').value) $('#workers').value = d.sys.default_workers;
+    $('#sysText').textContent = `${d.sys.cpus} CPU cores · encoder: ${d.sys.encoder === 'h264_videotoolbox' ? 'Apple VideoToolbox (hardware)' : d.sys.encoder}. Renders are split across workers in parallel.`;
+    const rl = $('#rlist'); rl.innerHTML = '';
+    if (!d.renders.length) rl.innerHTML = '<span class="hint">None yet.</span>';
+    d.renders.forEach(r => {
+      const row = document.createElement('div'), a = document.createElement('a'); a.href = '#'; a.textContent = '▶ ' + r.file;
+      a.onclick = ev => { ev.preventDefault(); playVideo(`/api/p/${S.name}/renderfile/${r.file}`); };
+      const dl = document.createElement('a'); dl.href = `/api/p/${S.name}/renderfile/${r.file}`; dl.download = r.file; dl.textContent = 'Download';
+      const sz = document.createElement('span'); sz.className = 'dim'; sz.textContent = r.mb + ' MB';
+      row.append(a, sz, dl); rl.appendChild(row);
+    });
+    updRangeText();
+  } catch (e) {}
+}
+function playVideo(src) { pausePlay(); const v = $('#vid'); v.src = src; v.hidden = false; $('#closevid').hidden = false; v.play().catch(() => {}); }
+$('#closevid').onclick = () => { const v = $('#vid'); v.pause(); v.hidden = true; $('#closevid').hidden = true; paintView(); };
+$('#btnRender').onclick = async () => {
+  if (!S.name) return; await saveNow(); await saveLookNow(); await saveStyleNow();
+  const [t0, t1] = curRange();
+  if (!S.audio) toast('No song loaded: the video will be silent.', 4000);
+  try {
+    const r = await (await postJSON(`/api/p/${S.name}/render`, { preset, t0, t1, workers: +$('#workers').value, look: Object.keys(LOOK).length ? LOOK : null })).json();
+    rjob = r.job; $('#btnRender').disabled = true; $('#btnCancel').hidden = false; $('#rprog').hidden = false; pollRender();
+  } catch (e) { toast('Render failed: ' + e.message); }
+};
+$('#btnCancel').onclick = async () => { if (rjob) await api(`/api/p/${S.name}/cancel/${rjob}`, { method: 'POST' }).catch(() => {}); };
+function pollRender() {
+  clearInterval(rtimer);
+  rtimer = setInterval(async () => {
+    try {
+      const j = await (await api(`/api/p/${S.name}/render/${rjob}`)).json(), pct = Math.round(100 * j.done / j.total);
+      $('#rbar').style.width = pct + '%';
+      const eta = j.eta ? ` · about ${j.eta >= 90 ? Math.round(j.eta / 60) + ' min' : j.eta + ' s'} left` : '';
+      $('#rtext').textContent = j.state === 'running' ? `${pct}% · ${j.workers} workers${eta}` : j.state === 'muxing' ? 'Adding the song…' : j.state === 'done' ? `Done in ${Math.round(j.elapsed)} s` : j.state === 'cancelled' ? 'Cancelled' : 'Failed: ' + j.error;
+      if (['done', 'error', 'cancelled'].includes(j.state)) {
+        clearInterval(rtimer); $('#btnRender').disabled = false; $('#btnCancel').hidden = true;
+        if (j.state === 'done') { refreshRenders(); playVideo(`/api/p/${S.name}/renderfile/${j.file}`); }
+      }
+    } catch (e) { clearInterval(rtimer); $('#btnRender').disabled = false; $('#btnCancel').hidden = true; }
+  }, 1000);
+}
+$('#btnSnap').onclick = async () => {
+  const msg = $('#pvmsg'); msg.hidden = false; msg.textContent = 'Saving full-resolution frame…';
+  try { await saveStyleNow(); const r = await (await postJSON(`/api/p/${S.name}/snapshot`, { t: ph, look: Object.keys(LOOK).length ? LOOK : null })).json(); msg.hidden = true; location.href = `/api/p/${S.name}/still/${r.file}`; }
+  catch (e) { msg.textContent = 'Save failed: ' + e.message; }
+};
+$('#btnExport').onclick = async () => { await saveNow(); await saveLookNow(); await saveStyleNow(); location.href = `/api/p/${S.name}/export?audio=0`; };
+$('#btnAudio').onclick = () => $('#fileAudio').click();
+$('#fileAudio').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return; setStatus('Uploading song…', 'warn');
+  try { await saveNow(); await api(`/api/p/${S.name}/audio`, { method: 'POST', body: f }); await openProject(S.name, 'export'); setStatus('Song loaded', 'ok'); }
+  catch (err) { setStatus('Upload failed', 'err'); toast(err.message); }
+};
+
+// ================================================================ TIMELINE
+const cv = $('#cv'), ctx = cv.getContext('2d');
+let cvw = 800, cvh = 200, dpr = 1;
+const ROW_Y = [92, 118], ROW_H = 22;
+function resizeCv() { const r = cv.parentElement.getBoundingClientRect(); if (!r.width) return; dpr = window.devicePixelRatio || 1; cvw = r.width; cvh = r.height; cv.width = Math.round(cvw * dpr); cv.height = Math.round(cvh * dpr); draw(); }
+new ResizeObserver(resizeCv).observe(cv.parentElement);
+const tx = t => (t - vs) * pps, wordRow = i => ROW_Y[i % 2];
+function draw() {
+  const w = cvw, h = cvh; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#09090b'; ctx.fillRect(0, 0, w, h);
+  if (!S.name) return;
+  const t0 = vs, t1 = vs + w / pps;
+  if (mIn !== null || mOut !== null) { const a = tx(mIn !== null ? mIn : 0), b = tx(mOut !== null ? mOut : S.dur); ctx.fillStyle = '#ff6a1a14'; ctx.fillRect(a, 0, b - a, h); ctx.fillStyle = '#ff6a1a88'; if (mIn !== null) ctx.fillRect(a, 0, 1, h); if (mOut !== null) ctx.fillRect(b, 0, 1, h); }
+  if (S.beat * pps > 7) { const k0 = Math.ceil((t0 - S.t0) / S.beat), k1 = Math.floor((t1 - S.t0) / S.beat); for (let k = k0; k <= k1; k++) { const x = Math.round(tx(S.t0 + k * S.beat)); ctx.fillStyle = k % 4 === 0 ? '#24242b' : '#151519'; ctx.fillRect(x, 0, 1, h - 20); } }
+  const mid = 44, amp = 36, V = S.vocal, fps = S.fps; ctx.fillStyle = '#3d5f86';
+  for (let x = 0; x < w; x++) { const a = Math.floor((t0 + x / pps) * fps), b = Math.max(a + 1, Math.floor((t0 + (x + 1) / pps) * fps)); let m = 0; for (let k = Math.max(0, a); k < b && k < V.length; k++) if (V[k] > m) m = V[k]; const hh = m / 255 * amp; if (hh > .4) ctx.fillRect(x, mid - hh, 1, hh * 2); }
+  ctx.font = '12px -apple-system,system-ui'; ctx.textBaseline = 'middle'; const Wd = S.words;
+  for (let i = 0; i < Wd.length; i++) {
+    const wd = Wd[i]; if (wd.end < t0 || wd.start > t1) continue;
+    const x0 = tx(wd.start), bw = Math.max(2, tx(wd.end) - x0), y = wordRow(i), issel = i === sel, sl = sel >= 0 && Wd[sel].line === wd.line;
+    ctx.fillStyle = issel ? '#ff6a1a' : (i === curWord && playing ? '#ffb27a' : (wd.line % 2 ? (sl ? '#4a5a78' : '#33405a') : (sl ? '#5d5a52' : '#3d3b37')));
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x0, y, bw, ROW_H, 4) : ctx.rect(x0, y, bw, ROW_H); ctx.fill();
+    if (isEdited(wd)) { ctx.fillStyle = '#ff6a1a'; ctx.fillRect(x0, y + ROW_H - 3, bw, 3); }
+    if (bw > 14) { ctx.save(); ctx.beginPath(); ctx.rect(x0, y, bw - 1, ROW_H); ctx.clip(); ctx.fillStyle = issel ? '#160a02' : '#efebe3'; ctx.fillText(wd.text, x0 + 5, y + ROW_H / 2); ctx.restore(); }
+    if (wd.wi === 0) { ctx.fillStyle = '#8b8984'; ctx.font = '10px system-ui'; ctx.fillText('L' + (wd.line + 1), x0 + 1, 152); ctx.font = '12px -apple-system,system-ui'; }
+  }
+  const steps = [.05, .1, .25, .5, 1, 2, 5, 10, 30, 60]; let st = 60; for (const s of steps) if (s * pps >= 70) { st = s; break; }
+  ctx.fillStyle = '#8b8984'; ctx.font = '10px system-ui'; ctx.textBaseline = 'bottom';
+  for (let t = Math.ceil(t0 / st) * st; t <= t1; t += st) { const x = Math.round(tx(t)); ctx.fillRect(x, h - 14, 1, 4); ctx.fillText(st < 1 ? t.toFixed(2) : mmss(t).replace(/\.00$/, ''), x + 3, h - 2); }
+  const px = tx(ph); if (px >= -2 && px <= w + 2) { ctx.fillStyle = '#ff6a1a'; ctx.fillRect(Math.round(px), 0, 1.5, h); ctx.beginPath(); ctx.moveTo(px - 5, 0); ctx.lineTo(px + 5, 0); ctx.lineTo(px, 8); ctx.fill(); }
+}
+function hit(x, y) {
+  const t = vs + x / pps;
+  for (let i = 0; i < S.words.length; i++) {
+    const wd = S.words[i]; if (t < wd.start - .01 || t > wd.end + .01) continue; const y0 = wordRow(i); if (y < y0 || y > y0 + ROW_H) continue;
+    const x0 = tx(wd.start), x1 = tx(wd.end), e = Math.min(7, (x1 - x0) / 3); return { i, part: x < x0 + e ? 'l' : (x > x1 - e ? 'r' : 'm') };
+  }
+  return null;
+}
+const posIn = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+let drag = null, scrub = false;
+cv.addEventListener('pointerdown', e => {
+  if (!S.name) return; cv.setPointerCapture(e.pointerId); const { x, y } = posIn(e), h = hit(x, y);
+  if (h) { pushUndo(); if (sel !== h.i) { sel = h.i; updChips(); updInspector(); } drag = { part: h.part, i: h.i, x0: x, orig: S.words.map(w => [w.start, w.end]), before: snap() }; draw(); }
+  else { scrub = true; setPlayhead(vs + x / pps); }
+});
+cv.addEventListener('pointermove', e => {
+  const { x, y } = posIn(e);
+  if (drag) {
+    let dt = (x - drag.x0) / pps; const Wd = S.words, i = drag.i, o = drag.orig, p = Wd[i - 1], n = Wd[i + 1]; let s = o[i][0], en = o[i][1];
+    if (drag.part === 'l') s = clampv(s + dt, p ? p.start + .02 : 0, en - .04);
+    else if (drag.part === 'r') en = clampv(en + dt, s + .04, n ? n.end - .02 : S.dur);
+    else {
+      const rip = $('#ripple').checked; let lo = -s, hi = S.dur - en; if (p) lo = Math.max(lo, p.start + .02 - s);
+      if (rip) hi = S.dur - o[o.length - 1][1]; else if (n) hi = Math.min(hi, n.end - .02 - en);
+      dt = clampv(dt, lo, hi); s += dt; en += dt; if (rip) for (let j = i + 1; j < Wd.length; j++) { Wd[j].start = r3(o[j][0] + dt); Wd[j].end = r3(o[j][1] + dt); }
+    }
+    Wd[i].start = r3(s); Wd[i].end = r3(en); dirty = true; refreshTs(); updInspector(); draw(); return;
+  }
+  if (scrub) { setPlayhead(vs + x / pps); return; }
+  const h = hit(x, y); cv.style.cursor = h ? (h.part === 'm' ? 'grab' : 'ew-resize') : 'default';
+});
+function endDrag(e) { if (drag) { if (snap() === drag.before) { undoStack.pop(); updUndoUI(); setPlayhead(vs + posIn(e).x / pps); } else afterEdit(); drag = null; } scrub = false; }
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+function zoomAt(x, f) { const t = vs + x / pps; pps = clampv(pps * f, 4, 2400); vs = Math.max(0, t - x / pps); draw(); }
+cv.addEventListener('wheel', e => { e.preventDefault(); if (e.ctrlKey || e.metaKey) zoomAt(posIn(e).x, Math.exp(-e.deltaY * .01)); else { vs = Math.max(0, vs + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) / pps); draw(); } }, { passive: false });
+$('#zoomIn').onclick = () => zoomAt(cvw / 2, 1.4); $('#zoomOut').onclick = () => zoomAt(cvw / 2, 1 / 1.4);
+$('#zoomFit').onclick = () => { pps = cvw / Math.max(1, S.dur); vs = 0; draw(); };
+
+// ================================================================ KEYS
+window.addEventListener('keydown', e => {
+  if ($('#editor').hidden) return;
+  const tag = (e.target.tagName || '').toUpperCase(), typing = (tag === 'INPUT' && !['range', 'checkbox', 'radio', 'color'].includes(e.target.type)) || tag === 'TEXTAREA' || tag === 'SELECT';
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); e.shiftKey ? doRedo() : doUndo(); return; }
+  if (typing || mod) return;
+  const k = e.key.toLowerCase();
+  if (tap && (k === 't' || e.key === 'Enter')) { e.preventDefault(); doTap(); return; }
+  if (tap && e.key === 'Escape') { stopTap(); return; }
+  if (e.key === ' ') { e.preventDefault(); playing ? (tap ? stopTap() : pausePlay()) : startPlay(); }
+  else if (k === 't') { e.preventDefault(); gotoStep('sync'); doTap(); }
+  else if (e.key === ',') stepFrame(-1); else if (e.key === '.') stepFrame(1);
+  else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && sel >= 0) { e.preventDefault(); pushUndo(); shiftWords([sel], (e.key === 'ArrowLeft' ? -1 : 1) * (e.shiftKey ? .05 : .01)); afterEdit(); }
+  else if (k === 's') setStartHere(); else if (k === 'e') setEndHere();
+  else if (k === 'i') $('#setIn').click(); else if (k === 'o') $('#setOut').click();
+  else if (k === 'b' && !e.repeat) holdBA(true);
+  else if (e.key === 'Tab') { e.preventDefault(); if (S.words.length) selectWord(clampv(sel < 0 ? 0 : sel + (e.shiftKey ? -1 : 1), 0, S.words.length - 1), true); }
+});
+window.addEventListener('keyup', e => { if (e.key.toLowerCase() === 'b') holdBA(false); });
+
+// ================================================================ GO
+(async () => {
+  try {
+    TPL = await (await api('/static/templates/templates.json')).json();
+    FONTS = await (await api('/static/templates/fonts.json')).json();
+    await showHome();
+  } catch (e) { toast('Could not reach ADx Studio: ' + e.message); }
+})();
+</script>
+</body>
+</html>

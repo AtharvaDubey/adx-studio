@@ -1,0 +1,72 @@
+{
+ "ink": {
+  "name": "Ink & Ember",
+  "desc": "Words appear as they are sung while a glowing pen draws a brush line under them.",
+  "bg1": "#0b0b0e",
+  "bg2": "#17110d",
+  "text": "#f1ece2",
+  "accent": "#ff6a1a",
+  "font": "Instrument Serif Italic",
+  "case": "as"
+ },
+ "kinetic": {
+  "name": "Kinetic Slam",
+  "desc": "One huge word at a time, slamming in on the beat with camera shake.",
+  "bg1": "#0a0a0c",
+  "bg2": "#1b0f0a",
+  "text": "#ffffff",
+  "accent": "#ff6a1a",
+  "font": "Big Shoulders Black",
+  "case": "upper"
+ },
+ "neon": {
+  "name": "Neon Night",
+  "desc": "Glowing neon tube lettering that flickers on, over a pulsing synthwave grid.",
+  "bg1": "#07040f",
+  "bg2": "#2a0b3d",
+  "text": "#ffffff",
+  "accent": "#ff3df2",
+  "font": "Big Shoulders",
+  "case": "upper"
+ },
+ "karaoke": {
+  "name": "Clean Karaoke",
+  "desc": "The full line on screen, filling with colour word by word; next line below.",
+  "bg1": "#101422",
+  "bg2": "#2b1638",
+  "text": "#ffffff",
+  "accent": "#ffcf3d",
+  "font": "Archivo Bold",
+  "case": "as"
+ },
+ "typewriter": {
+  "name": "Typewriter",
+  "desc": "Letters are typed out on paper with a blinking cursor; the page scrolls.",
+  "bg1": "#efe7d6",
+  "bg2": "#e2d6bd",
+  "text": "#1e1b17",
+  "accent": "#b3261e",
+  "font": "Courier Prime",
+  "case": "as"
+ },
+ "cinematic": {
+  "name": "Cinematic",
+  "desc": "Elegant serif lines that resolve out of blur, letterbox bars and light leaks.",
+  "bg1": "#08080a",
+  "bg2": "#1a1410",
+  "text": "#f3eee4",
+  "accent": "#ffb36b",
+  "font": "Instrument Serif",
+  "case": "as"
+ },
+ "social": {
+  "name": "Social Captions",
+  "desc": "Bold short phrases with the active word on a colour block. Made for Reels and Shorts.",
+  "bg1": "#111111",
+  "bg2": "#2a2a2a",
+  "text": "#ffffff",
+  "accent": "#ffd400",
+  "font": "Archivo Black",
+  "case": "upper"
+ }
+}
